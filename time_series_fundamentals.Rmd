@@ -7,29 +7,86 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-```{r}
-plot(cars)
-```
+<style type="text/css">
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+body{ /* Normal  */
+      font-size: 12px;
+  }
+td {  /* Table  */
+  font-size: 8px;
+}
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  font-size: 28px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 22px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+code.r{ /* Code block */
+    font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+    font-size: 14px;
+}
+</style>
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
-```{r}
-
-
-```
 
 
 ```{r}
 library(tidyverse)
+library(ggplot2)
+library(tseries)
 ```
+
+
+
+
+#Motivation
+The motivation of time series is to predict trends, forecast, seasonalities, cyclical patterns.
+For example: a real state company that heavily invests during a peak market time, can have heavy losses afterward.
+
+
 
 ```{r}
 transactions <- read_csv("data/credit_card_transactions.csv")
 transactions |> names() <- transactions |> names() |> tolower() 
+transactions <- transactions |> mutate(formatted_date = as.Date(date, format = "%d-%b-%y")) |> 
+  arrange(formatted_date)
 transactions |> head()
 ```
+
+
+```{r}
+#Aggregate the data for stationarity test
+transactions_grouped <- transactions |> summarize(total_amount = sum(amount), .by = c(formatted_date))
+head(transactions_grouped)
+
+```
+```{r}
+ggplot(transactions_grouped, 
+       mapping = aes(x = formatted_date,
+                     y = total_amount)) + geom_line()
+```
+
+
+```{r}
+adf.test(transactions_grouped$total_amount, k = 31)
+```
+
+```{r}
+pp.test(transactions_grouped$total_amount,
+        alternative = c("stationary"),
+        type = c("Z(t_alpha)"), lshort = FALSE)
+```
+
 
