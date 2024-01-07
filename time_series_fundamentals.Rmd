@@ -55,6 +55,12 @@ library(tseries)
 The motivation of time series is to predict trends, forecast, seasonalities, cyclical patterns.
 For example: a real state company that heavily invests during a peak market time, can have heavy losses afterward.
 
+To predict future behavior auto regressive (AR) models like  are commonly used and , several concepts must be taken into account before using them:
+- These models has assumptions that the data mean, variance and autocorrelation is constant over the time. Because if so, they are easier to fit, and more interpretable. It also makes predictions more straightforward, as the future values are assumed to behave similarly to past values in terms of these statistical properties.
+If this assumptions were violated, poor estimates and innacurate predictions will be made.
+A time series that respect these assumptions is a stationary time series, to find out if the assumptions are respected and the stationarity is present, tests like dickey-fuller or phillips-perron, must be done, where low p-values suggests strong evidence against null hypothesis (null hypothesis=non-stationary).
+If a time series has a unit root, it means that it is not stationary.
+
 
 
 ```{r}
