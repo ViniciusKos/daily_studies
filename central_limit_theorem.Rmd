@@ -1,0 +1,72 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(palmerpenguins)
+library(moments)
+library(car)
+```
+
+
+
+
+# Motivation
+The motivation of time series is to predict trends, forecast, seasonalities, cyclical patterns.
+For example: a real state company that heavily invests during a peak market time, can have heavy losses afterward.
+
+To predict future behavior auto regressive (AR) models like  are commonly used and , several concepts must be taken into account before using them:
+- These models has assumptions that the data mean, variance and autocorrelation is constant over the time. Because if so, they are easier to fit, and more interpretable. It also makes predictions more straightforward, as the future values are assumed to behave similarly to past values in terms of these statistical properties.
+If this assumptions were violated, poor estimates and innacurate predictions will be made.
+A time series that respect these assumptions is a stationary time series, to find out if the assumptions are respected and the stationarity is present, tests like dickey-fuller or phillips-perron, must be done, where low p-values suggests strong evidence against null hypothesis (null hypothesis=non-stationary).
+If a time series has a unit root, it means that it is not stationary.
+
+
+
+```{r}
+head(penguins)
+```
+
+
+```{r}
+bill_length <- penguins |> filter(species == "Adelie" &
+                                    island == "Torgersen") |> head(50) |> pull(bill_length_mm)
+
+hist(bill_length)
+```
+
+```{r}
+set.seed(42)
+
+samples <- sample(bill_length,10 ,replace = TRUE)
+dens <- density(samples, na.rm = TRUE)
+plot(dens)
+
+#calculate skewness
+skewness(samples, na.rm=TRUE)
+
+#calculate kurtosis
+kurtosis(samples, na.rm=TRUE)
+
+
+ggplot(data.frame(sample = samples), aes(sample = samples)) +
+  stat_qq() +
+  stat_qq_line() +
+  ggtitle("QQ Plot of Penguin Body Mass") +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles")
+
+shapiro_test_result <- shapiro.test(samples)
+shapiro_test_result
+```
+
+
+
+
+
