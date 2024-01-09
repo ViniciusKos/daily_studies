@@ -66,6 +66,29 @@ shapiro_test_result <- shapiro.test(samples)
 shapiro_test_result
 ```
 
+```{r}
+# Assuming you've already loaded the palmerpenguins package and its data
+library(palmerpenguins)
+
+# Using the body mass of penguins for this example
+# Remove NA values from the dataset
+penguin_data <- na.omit(penguins$bill_length_mm)
+
+# Calculate mean and standard deviation
+mean_val <- mean(penguin_data)
+sd_val <- sd(penguin_data)
+
+# Calculate percentages within one, two, and three standard deviations
+within_one_sd <- mean(abs(penguin_data - mean_val) <= sd_val)
+within_two_sd <- mean(abs(penguin_data - mean_val) <= 2 * sd_val)
+within_three_sd <- mean(abs(penguin_data - mean_val) <= 3 * sd_val)
+
+# Print results
+cat("Percentage within 1 SD (expected ~68%):", within_one_sd * 100, "%\n")
+cat("Percentage within 2 SD (expected ~95%):", within_two_sd * 100, "%\n")
+cat("Percentage within 3 SD (expected ~99.7%):", within_three_sd * 100, "%\n")
+
+```
 
 
 
