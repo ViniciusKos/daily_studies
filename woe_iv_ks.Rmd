@@ -20,10 +20,17 @@ options(digits=2)
 
 # Motivation
 
+
+#In credit score context, defaults needs to be avoided, the default is a "bad". Therefore negative WoE are good, because it tells that the probability of event (loan) is unlikely to happen compared to the non-event (not default)
+
+
+
 ```{r}
 loan <- read_csv("data/cr_loan2.csv")
 head(loan)
 ```
+
+
 
 ```{r}
 calculate <- function(data, feature, target) {
