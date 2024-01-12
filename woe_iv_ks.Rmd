@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+```{r}
+options(digits=2)
+
+```
+
+
+# Motivation
+
+```{r}
+loan <- read_csv("data/cr_loan2.csv")
+head(loan)
+```
+
+```{r}
+calculate <- function(data, feature, target) {
+  dist_table <- data |> 
+    summarise(good = sum(!!sym(target) == 1),
+              bad = sum(!!sym(target) == 0),
+              .by = loan_intent) |> 
+    mutate(total = good+bad,
+           dist_good = good/sum(good),
+           dist_bad = bad/sum(bad)) |> 
+    filter(total > 0)
+  
+  woe_table <- dist_table |>
+    mutate(
+      proportion = dist_bad/dist_good,
+      woe = log(dist_bad/dist_good))
+  return(woe_table)
+    }
+
+woe_table <- calculate(loan, "loan_intent", "loan_status")
+woe_table |> head()
+```
+
+```{r}
+loan |> 
+  summarise(good = sum(loan_status==1),
+            bad = sum(loan_status==0),
+            .by = loan_intent) |> 
+      mutate(total = good+bad,
+           dist_good = good/sum(good))
+```
+
