@@ -4,6 +4,10 @@ output: html_notebook
 ---
 
 
+```{r}
+install.packages("pwr")
+
+```
 
 
 ```{r}
@@ -21,45 +25,53 @@ options(digits=2)
 # Motivation
 
 
-#In credit score context, defaults needs to be avoided, the default is a "bad". Therefore negative WoE are good, because it tells that the probability of event (loan) is unlikely to happen compared to the non-event (not default)
+-test address the problem of findout whether or not the difference between two groups is significant
 
-
-
-```{r}
-loan <- read_csv("data/cr_loan2.csv")
-head(loan)
-```
-
+assumptions:
+for smaller samples the normality is needed, whereas from larger samples, the CLT assures justify the t-test even if the distribution is non normal
+independent two sample test assumes equal variance, conversely, weich t-test doesn't
 
 
 ```{r}
-calculate <- function(data, feature, target) {
-  dist_table <- data |> 
-    summarise(good = sum(!!sym(target) == 1),
-              bad = sum(!!sym(target) == 0),
-              .by = loan_intent) |> 
-    mutate(total = good+bad,
-           dist_good = good/sum(good),
-           dist_bad = bad/sum(bad)) |> 
-    filter(total > 0)
-  
-  woe_table <- dist_table |>
-    mutate(
-      proportion = dist_bad/dist_good,
-      woe = log(dist_bad/dist_good))
-  return(woe_table)
-    }
+# Load necessary libraries
 
-woe_table <- calculate(loan, "loan_intent", "loan_status")
-woe_table |> head()
+library(ggplot2)
+library(dplyr)
+library(pwr)
+
+# Generate toy dataset
+set.seed(123)  # for reproducibility
+data1 <- rnorm(50, mean = 100, sd = 30)  # first sample
+data2 <- rnorm(50, mean = 110, sd = 15)  # second sample
+
+# Normality test - Shapiro-Wilk test
+shapiro.test(data1)
+shapiro.test(data2)
+
+# Perform t-test
+t_test_result <- t.test(data1, data2, var.equal = TRUE)  # assuming equal variance
+
+# Output results
+print(t_test_result)
+
+# Effect size - Cohen's d
+effect_size <- (mean(data1) - mean(data2)) / sqrt(((49 * var(data1)) + (49 * var(data2))) / 50)
+print(paste("Effect size (Cohen's d):", effect_size))
+
+# If the null hypothesis is in the confidence interval (0 differences between the mean), there's a a  evidence that it it is true.
+
+# Test power calculation
+pwr_result <- pwr.t.test(n = 50, 
+                         d = effect_size, 
+                         sig.level = t_test_result$p.value, 
+                         type = "two.sample", 
+                         alternative = "two.sided")
+print(pwr_result)
+
+# Confidence intervals
+conf_int <- t_test_result$conf.int
+print(paste("Confidence Intervals:", conf_int[1], "to", conf_int[2]))
+
 ```
 
-```{r}
-loan |> 
-  summarise(good = sum(loan_status==1),
-            bad = sum(loan_status==0),
-            .by = loan_intent) |> 
-      mutate(total = good+bad,
-           dist_good = good/sum(good))
-```
 
