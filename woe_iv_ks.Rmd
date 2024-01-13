@@ -75,3 +75,23 @@ print(paste("Confidence Intervals:", conf_int[1], "to", conf_int[2]))
 ```
 
 
+```{r}
+# Function to calculate degrees of freedom for unequal variances t-test
+welch_df <- function(n1, n2, var1, var2) {
+  df <- (var1/n1 + var2/n2)^2 / ((var1^2) / (n1^2 * (n1 - 1)) + (var2^2) / (n2^2 * (n2 - 1)))
+  return(df)
+}
+
+# Example usage:
+# n1, n2 = sample sizes for the two groups
+# var1, var2 = sample variances for the two groups
+
+n1 <- 40  # Sample size of group 1
+n2 <- 50  # Sample size of group 2
+var1 <- 100  # Variance of group 1
+var2 <- 144  # Variance of group 2
+
+degrees_of_freedom <- welch_df(n1, n2, var1, var2)
+print(degrees_of_freedom)
+```
+
