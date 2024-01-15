@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+install.packages("pwr")
+
+```
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+```{r}
+options(digits=2)
+
+```
+
+
+# Motivation
+
+
+-test address the problem of findout whether or not the difference between two groups is significant
+
+assumptions:
+for smaller samples the normality is needed, whereas from larger samples, the CLT assures justify the t-test even if the distribution is non normal
+independent two sample test assumes equal variance, conversely, weich t-test doesn't
+
+
+```{r}
+# Load necessary libraries
+
+library(ggplot2)
+library(dplyr)
+library(pwr)
+
+# Generate toy dataset
+set.seed(123)  # for reproducibility
+data1 <- rnorm(50, mean = 100, sd = 30)  # first sample
+data2 <- rnorm(50, mean = 110, sd = 15)  # second sample
+
+# Normality test - Shapiro-Wilk test
+shapiro.test(data1)
+shapiro.test(data2)
+
+# Perform t-test
+t_test_result <- t.test(data1, data2, var.equal = TRUE)  # assuming equal variance
+
+# Output results
+print(t_test_result)
+
+# Effect size - Cohen's d
+effect_size <- (mean(data1) - mean(data2)) / sqrt(((49 * var(data1)) + (49 * var(data2))) / 50)
+print(paste("Effect size (Cohen's d):", effect_size))
+
+# If the null hypothesis is in the confidence interval (0 differences between the mean), there's a a  evidence that it it is true.
+
+# Test power calculation
+pwr_result <- pwr.t.test(n = 50, 
+                         d = effect_size, 
+                         sig.level = t_test_result$p.value, 
+                         type = "two.sample", 
+                         alternative = "two.sided")
+print(pwr_result)
+
+# Confidence intervals
+conf_int <- t_test_result$conf.int
+print(paste("Confidence Intervals:", conf_int[1], "to", conf_int[2]))
+
+```
+
+
+```{r}
+# Function to calculate degrees of freedom for unequal variances t-test
+welch_df <- function(n1, n2, var1, var2) {
+  df <- (var1/n1 + var2/n2)^2 / ((var1^2) / (n1^2 * (n1 - 1)) + (var2^2) / (n2^2 * (n2 - 1)))
+  return(df)
+}
+
+# Example usage:
+# n1, n2 = sample sizes for the two groups
+# var1, var2 = sample variances for the two groups
+
+n1 <- 40  # Sample size of group 1
+n2 <- 50  # Sample size of group 2
+var1 <- 100  # Variance of group 1
+var2 <- 144  # Variance of group 2
+
+degrees_of_freedom <- welch_df(n1, n2, var1, var2)
+print(degrees_of_freedom)
+```
+
