@@ -1,0 +1,56 @@
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+from sklearn.model_selection import train_test_split
+from scipy.stats import randint as sp_randint
+from scipy.stats import uniform
+
+# Assuming X and y are your dataset's features and target variable
+# X, y = load_your_data()
+
+# Split dataset for demonstration
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define the parameter distributions for each classifier
+rf_param_dist = {
+    'n_estimators': sp_randint(100, 500),
+    'max_depth': sp_randint(1, 50),
+    'min_samples_split': sp_randint(2, 100),
+    'min_samples_leaf': sp_randint(1, 100)
+}
+
+xgb_param_dist = {
+    'n_estimators': sp_randint(100, 500),
+    'max_depth': sp_randint(1, 50),
+    'learning_rate': uniform(0.01, 0.99),
+    'colsample_bytree': uniform(0.1, 0.9),
+    'subsample': uniform(0.1, 0.9)
+}
+
+lgbm_param_dist = {
+    'n_estimators': sp_randint(100, 500),
+    'max_depth': sp_randint(-1, 50),
+    'learning_rate': uniform(0.01, 0.99),
+    'num_leaves': sp_randint(2, 100),
+    'colsample_bytree': uniform(0.1, 0.9),
+    'subsample': uniform(0.1, 0.9)
+}
+
+# Setup RandomizedSearchCV for each classifier
+n_iter_search = 100
+rf_random_search = RandomizedSearchCV(RandomForestClassifier(random_state=42), param_distributions=rf_param_dist, n_iter=n_iter_search, cv=5, random_state=42)
+xgb_random_search = RandomizedSearchCV(XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42), param_distributions=xgb_param_dist, n_iter=n_iter_search, cv=5, random_state=42)
+lgbm_random_search = RandomizedSearchCV(LGBMClassifier(random_state=42), param_distributions=lgbm_param_dist, n_iter=n_iter_search, cv=5, random_state=42)
+
+# Execute the search
+print("Tuning RandomForestClassifier...")
+rf_random_search.fit(X_train, y_train)
+print("Best parameters:", rf_random_search.best_params_)
+
+print("Tuning XGBClassifier...")
+xgb_random_search.fit(X_train, y_train)
+print("Best parameters:", xgb_random_search.best_params_)
+
+print("Tuning LGBMClassifier...")
+lgbm_random
