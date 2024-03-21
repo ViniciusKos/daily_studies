@@ -1,0 +1,75 @@
+from skopt import BayesSearchCV
+from skopt.space import Real, Categorical, Integer
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+from sklearn.model_selection import train_test_split
+
+# Assuming X and y are your dataset's features and target variable
+# X, y = load_your_data()
+
+# Split dataset for demonstration
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define the search space for each classifier
+rf_search_space = {
+    'n_estimators': Integer(100, 500),
+    'max_depth': Integer(1, 50),
+    'min_samples_split': Integer(2, 100),
+    'min_samples_leaf': Integer(1, 100)
+}
+
+xgb_search_space = {
+    'n_estimators': Integer(100, 500),
+    'max_depth': Integer(1, 50),
+    'learning_rate': Real(0.01, 1.0, 'log-uniform'),
+    'colsample_bytree': Real(0.1, 1.0),
+    'subsample': Real(0.1, 1.0)
+}
+
+lgbm_search_space = {
+    'n_estimators': Integer(100, 500),
+    'max_depth': Integer(-1, 50),
+    'learning_rate': Real(0.01, 1.0, 'log-uniform'),
+    'num_leaves': Integer(2, 100),
+    'colsample_bytree': Real(0.1, 1.0),
+    'subsample': Real(0.1, 1.0)
+}
+
+# Setup BayesSearchCV for each classifier
+rf_opt = BayesSearchCV(
+    RandomForestClassifier(random_state=42),
+    rf_search_space,
+    n_iter=32,
+    random_state=42,
+    cv=5
+)
+
+xgb_opt = BayesSearchCV(
+    XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42),
+    xgb_search_space,
+    n_iter=32,
+    random_state=42,
+    cv=5
+)
+
+lgbm_opt = BayesSearchCV(
+    LGBMClassifier(random_state=42),
+    lgbm_search_space,
+    n_iter=32,
+    random_state=42,
+    cv=5
+)
+
+# Execute the search
+print("Tuning RandomForestClassifier...")
+rf_opt.fit(X_train, y_train)
+print("Best parameters:", rf_opt.best_params_)
+
+print("Tuning XGBClassifier...")
+xgb_opt.fit(X_train, y_train)
+print("Best parameters:", xgb_opt.best_params_)
+
+print("Tuning LGBMClassifier...")
+lgbm_opt.fit(X_train, y_train)
+print("Best parameters:", lgbm_opt.best_params_)
