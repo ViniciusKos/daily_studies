@@ -30,3 +30,31 @@ words = [
     "smartphone", "tecnologia", "assistência", "viagem", "socorro", "mecânico", 
     "reboque", "personalização", "performance", "segurança", "conforto", "economia", 
     "eficiência", "sustentabilidade", "inovação", "design"]
+
+import pandas as pd
+from pandas.tseries.offsets import MonthEnd
+
+# Assuming df is your DataFrame with columns: customer_id, date, and revenue
+# Ensure 'date' is in datetime format
+df['date'] = pd.to_datetime(df['date'])
+
+# Set the current date for the example; in a real scenario, this would be the date of the last transaction or today's date
+current_date = pd.to_datetime('2024-03-22')
+
+# Calculate the end of the month for the current date to ensure consistency in monthly calculations
+current_date_end_of_month = current_date + MonthEnd(0)
+
+# Calculate total revenue in the last 3, 6, and 12 months
+def calculate_revenue(row, months_back):
+    # Define the period start date
+    period_start_date = current_date_end_of_month - pd.DateOffset(months=months_back)
+    # Filter the DataFrame for transactions within the desired time frame for this customer
+    filtered_transactions = df[(df['customer_id'] == row['customer_id']) & (df['date'] > period_start_date) & (df['date'] <= current_date_end_of_month)]
+    # Return the sum of revenue for the filtered transactions
+    return filtered_transactions['revenue'].sum()
+
+# Apply the function to calculate additional columns
+df['revenue_last_3_months'] = df.apply(lambda row: calculate_revenue(row, 3), axis=1)
+df['revenue_last_6_months'] = df.apply(lambda row: calculate_revenue(row, 6), axis=1)
+df['revenue_last_12_months'] = df.apply(lambda row: calculate_revenue(row, 12), axis=1)
+
