@@ -1,0 +1,60 @@
+words = [
+    "financiamento", "veículo", "automóvel", "carro", "consórcio", "empréstimo", 
+    "seguro", "parcelamento", "entrada", "crédito", "compra", "vistoria", 
+    "licenciamento", "ipva", "transferência", "revisão", "leilão", "usado", 
+    "novo", "troca", "pagamento", "negociação", "contrato", "documentação", 
+    "registro", "taxa", "multa", "renovação", "sinistro", "apólice", "financiar", 
+    "investimento", "leasing", "subvenção", "garantia", "prestação", "alienação", 
+    "reserva", "seguradora", "cobertura", "sinistrado", "franquia", "indenização", 
+    "apreensão", "restrição", "endosso", "cessão", "quitado", "refinanciamento", 
+    "amortização", "propriedade", "locatário", "locador", "leasing", "valor", 
+    "venda", "oferta", "promoção", "desconto", "lance", "modelo", "marca", 
+    "cor", "ano", "quilometragem", "combustível", "potência", "câmbio", 
+    "manual", "automático", "diesel", "gasolina", "etanol", "hibrido", 
+    "elétrico", "placa", "chassi", "motor", "portas", "ar-condicionado", 
+    "direção", "hidráulica", "elétrica", "blindado", "airbag", "abs", 
+    "gps", "alarme", "trava", "vidro", "eletrico", "teto", "solar", "panorâmico", 
+    "couro", "multimídia", "revisões", "fabricante", "importado", "nacional", 
+    "sedan", "hatch", "suv", "pickup", "esportivo", "luxo", "conversível", 
+    "coupé", "rodas", "liga", "leve", "farol", "neblina", "sensor", "estacionamento", 
+    "câmera", "ré", "turbo", "injeção", "eletrônica", "performance", "econômico", 
+    "sustentável", "autonomia", "recarga", "rápida", "capacidade", "bagagem", 
+    "passageiros", "acessórios", "opcional", "série", "edição", "limitada", 
+    "pacote", "premium", "básico", "completo", "customizado", "kit", "gás", 
+    "adaptação", "segunda", "mão", "vistoriado", "aprovado", "garantia", "mecânica", 
+    "carroceria", "pintura", "estofamento", "manutenção", "preventiva", "corretiva", 
+    "peças", "originais", "compatíveis", "troca", "óleo", "filtro", "pneus", 
+    "alinhamento", "balanceamento", "suspensão", "freios", "pastilhas", "discos", 
+    "embreagem", "radiador", "arrefecimento", "escape", "muffler", "tuning", 
+    "som", "amplificador", "subwoofer", "bluetooth", "interface", "integração", 
+    "smartphone", "tecnologia", "assistência", "viagem", "socorro", "mecânico", 
+    "reboque", "personalização", "performance", "segurança", "conforto", "economia", 
+    "eficiência", "sustentabilidade", "inovação", "design"]
+
+import pandas as pd
+from pandas.tseries.offsets import MonthEnd
+
+# Assuming df is your DataFrame with columns: customer_id, date, and revenue
+# Ensure 'date' is in datetime format
+df['date'] = pd.to_datetime(df['date'])
+
+# Set the current date for the example; in a real scenario, this would be the date of the last transaction or today's date
+current_date = pd.to_datetime('2024-03-22')
+
+# Calculate the end of the month for the current date to ensure consistency in monthly calculations
+current_date_end_of_month = current_date + MonthEnd(0)
+
+# Calculate total revenue in the last 3, 6, and 12 months
+def calculate_revenue(row, months_back):
+    # Define the period start date
+    period_start_date = current_date_end_of_month - pd.DateOffset(months=months_back)
+    # Filter the DataFrame for transactions within the desired time frame for this customer
+    filtered_transactions = df[(df['customer_id'] == row['customer_id']) & (df['date'] > period_start_date) & (df['date'] <= current_date_end_of_month)]
+    # Return the sum of revenue for the filtered transactions
+    return filtered_transactions['revenue'].sum()
+
+# Apply the function to calculate additional columns
+df['revenue_last_3_months'] = df.apply(lambda row: calculate_revenue(row, 3), axis=1)
+df['revenue_last_6_months'] = df.apply(lambda row: calculate_revenue(row, 6), axis=1)
+df['revenue_last_12_months'] = df.apply(lambda row: calculate_revenue(row, 12), axis=1)
+
