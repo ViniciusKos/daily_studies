@@ -1,35 +1,46 @@
 import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt
 
-def stratified_sample(df, group_column, proportions):
-    """
-    Perform stratified sampling based on specific proportions per group.
+# Create a toy dataset
+data = {
+    'Estado Civil': ['Casado', 'Divorciado', 'Separado', 'Solteiro', 'Uniao Estavel', 'Viuvo', 'Missing'],
+    'Total': [19924, 1033, 215, 11477, 195, 295, 3455],
+    '1': [912, 79, 19, 485, 8, 14, 92],
+    '0': [19012, 954, 208, 10992, 187, 281, 3363]
+}
 
-    Parameters:
-    - df: pandas DataFrame containing the dataset.
-    - group_column: String, the name of the column that contains the group IDs.
-    - proportions: Dictionary, where keys are the group IDs and values are the proportions for each group.
+# Convert the dictionary to a pandas DataFrame
+df = pd.DataFrame(data)
 
-    Returns:
-    - A sampled pandas DataFrame according to the specified proportions.
-    """
-    # Ensure the proportions sum to 1
-    if not np.isclose(sum(proportions.values()), 1):
-        raise ValueError("The sum of proportions must be 1.")
-    
-    # Calculate the sample size for each group
-    sample_sizes = {group: int(total * proportion) for group, proportion in proportions.items()}
-    
-    # Sample each group according to its calculated sample size
-    samples = [df[df[group_column] == group].sample(n=size, replace=False) for group, size in sample_sizes.items()]
-    
-    # Combine the samples from each group
-    sampled_df = pd.concat(samples, ignore_index=True)
-    
-    return sampled_df
+# Calculate conversion rate
+df['Conversao'] = df['1'] / df['Total'] * 100
 
-# Example usage
-# Assuming `df` is your DataFrame, `group_column` is the column containing group IDs,
-# and `proportions` is a dictionary with group IDs as keys and sampling proportions as values.
-# proportions = {'group1': 0.5, 'group2': 0.3, 'group3': 0.2}
-# sampled_df = stratified_sample(df, 'group_column_name', proportions)
+# Plotting
+fig, ax1 = plt.subplots(figsize=(10, 5))
+
+# Bar plot for Total counts
+ax1.bar(df['Estado Civil'], df['Total'], color='orange', label='Total')
+
+# Make the y-axis label and tick labels match the line color.
+ax1.set_ylabel('Total', color='orange')
+for tl in ax1.get_yticklabels():
+    tl.set_color('orange')
+
+# Create a second y-axis for the conversion rate line plot
+ax2 = ax1.twinx()
+ax2.plot(df['Estado Civil'], df['Conversao'], color='blue', label='Conversão', marker='o')
+
+# Make the y-axis label and tick labels match the line color.
+ax2.set_ylabel('Conversão (%)', color='blue')
+for tl in ax2.get_yticklabels():
+    tl.set_color('blue')
+
+# Show the legend
+ax1.legend(loc='upper left')
+ax2.legend(loc='upper right')
+
+# Set the x-axis label
+ax1.set_xlabel('Estado Civil')
+
+# Show the plot
+plt.show()
